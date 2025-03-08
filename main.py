@@ -1,17 +1,60 @@
 import warnings
-from application import Application
+import random
+import argparse
 from IPython.display import Markdown
 
-warnings.filterwarnings('ignore')
+from app.application import Application
+from enums.llm_type import LLMType
+from utils.csv_reader import CSVReader
+
+def parse_args():
+    parser = argparse.ArgumentParser(description='AI Tutor Application')
+    parser.add_argument(
+        '--llm',
+        type=str,
+        choices=['GOOGLE', 'OPENAI', 'LOCAL'],
+        default='GOOGLE',
+        help='LLM type to use (GOOGLE or OPENAI or LOCAL)'
+    )
+    parser.add_argument(
+        '--students',
+        type=int,
+        default=10,
+        help='Number of students to simulate'
+    )
+    parser.add_argument(
+        '--file',
+        type=str,
+        default='data/question_content_math_7.csv',
+        help='Path to CSV file containing problems'
+    )
+    return parser.parse_args()
 
 if __name__ == "__main__":
+    args = parse_args()
+    warnings.filterwarnings('ignore')
+
+    # Read problems from specified file
+    csv_reader = CSVReader(args.file)
+    problems = csv_reader.read_to_dict()
+
+    # Pick one random problem
+    problem = random.choice(problems)
+
+    print(f"Question ID: {problem['item_id']}")
+    print(f"Description: {problem['item_description']}")
+    print(f"Question: {problem['question']}")
+    print(f"Answer: {problem['answer']}")
+    print(f"Explanation: {problem['explanation']}\n")
+
     inputs = {
         "grade": 7,
-        "question": '<div class="question-content__1pw2-"><div class="markup"><div><div><div><div class="_33s8iDB86ShboS4mZ56Q4l"><div class="solution"><p class="kLnDsmZC8c49r2Ntz8LHD"><span>次の減法を加法に直して計算しなさい。</span></p><p class="kLnDsmZC8c49r2Ntz8LHD"><span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>0</mn><mo>−</mo><mo stretchy="false">(</mo><mo>+</mo><mn>3</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">0-(+3)</annotation></semantics></math></span></span></span><span></span></p></div><div></div></div></div></div></div><div></div></div></div>',
-        "explanation": '<div class="solution-content__1icoL"><div class="markup"><div><div><div><div class="_33s8iDB86ShboS4mZ56Q4l"><div class="solution"><p class="kLnDsmZC8c49r2Ntz8LHD"><span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mtext></mtext><mn>0</mn><mo>−</mo><mo stretchy="false">(</mo><mo>+</mo><mn>3</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">~~~~0-(+3)</annotation></semantics></math></span></span></span><span></span></p><p class="kLnDsmZC8c49r2Ntz8LHD"><span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>=</mo><mn>0</mn><mo>+</mo><mo stretchy="false">(</mo><mo>−</mo><mn>3</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">=0+(-3)</annotation></semantics></math></span></span></span><span></span></p><p class="kLnDsmZC8c49r2Ntz8LHD"><span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>=</mo><mn>0</mn><mo>−</mo><mn>3</mn></mrow><annotation encoding="application/x-tex">=0-3</annotation></semantics></math></span></span></span><span></span></p><p class="kLnDsmZC8c49r2Ntz8LHD"><span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>=</mo><mo>−</mo><mn>3</mn></mrow><annotation encoding="application/x-tex">=-3</annotation></semantics></math></span></span></span><span></span></p></div><div></div></div></div></div></div><div></div></div></div>',
-        "result": "-3",
+        "question": "\n".join([problem["item_description"], problem["question"]]),
+        "explanation": problem["explanation"],
+        "answer": problem["answer"],
     }
-    app = Application()
-    app.setup()
+
+    app = Application(llm_type=LLMType[args.llm])
+    app.setup(total_students=args.students)
     result = app.run(inputs)
     Markdown(result.raw)

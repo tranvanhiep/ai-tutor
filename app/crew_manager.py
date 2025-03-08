@@ -21,7 +21,7 @@ class CrewManager:
     def add_tasks(self, *tasks: Task):
         self.tasks.extend(tasks)
 
-    def build_crew(self, process: Process, memory: bool, embedder: dict | None):
+    def build_crew(self, process: Process, embedder: dict | None, memory: bool = False):
         return Crew(
             agents=self.agents,
             tasks=self.tasks,
