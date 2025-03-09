@@ -92,7 +92,7 @@ class Application:
                 "Provide feedback to the grade {grade} student to help them understand their mistakes."
                 "Provide guidance to the grade {grade} student to help them improve their resolution."
             ),
-            allow_delegation=True,
+            allow_delegation=False,
             llm=self.llm,
         )
 
@@ -124,6 +124,7 @@ class Application:
                 "- Understanding demonstrated"
             ),
             agent=teacher,
+            context=problem_solving_tasks,
         )
 
         pick_solution_task = TaskBuilder.create_task(
@@ -140,6 +141,7 @@ class Application:
                 "- Explain why you choose this solution\n"
             ),
             agent=teacher,
+            context=[homework_reviewing_task],
         )
 
         # Add Marker agent
@@ -185,6 +187,7 @@ class Application:
                 "- Detailed justification"
             ),
             agent=marker,
+            context=[pick_solution_task],
         )
 
         self.crew_manager.add_agents(*students, teacher, marker)

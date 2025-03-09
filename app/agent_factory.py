@@ -5,7 +5,13 @@ class AgentFactory:
     """Factory to create agents dynamically."""
 
     @staticmethod
-    def create_agent(role: str, goal: str, backstory: str, allow_delegation: bool, llm: LLM):
+    def create_agent(
+        role: str,
+        goal: str,
+        backstory: str,
+        allow_delegation: bool,
+        llm: LLM,
+    ):
         return Agent(
             role=role,
             goal=goal,
