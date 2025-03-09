@@ -23,6 +23,12 @@ conda create -n ai-tutor python=3.12.3
 conda activate ai-tutor
 ```
 
+3. Install system dependencies:
+```bash
+sudo apt update
+sudo apt install -y tesseract-ocr tesseract-ocr-jpn
+```
+
 ## Installation
 
 1. Clone the repository:
