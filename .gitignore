@@ -16,7 +16,8 @@ build/
 *.egg-info/
 
 # IDE Settings
-.vscode/
+.vscode/*
+!.vscode/launch.json
 .idea/
 *.swp
 *.swo

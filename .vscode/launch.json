@@ -1,0 +1,52 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Debug main.py (GOOGLE)",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/main.py",
+            "console": "integratedTerminal",
+            "args": [
+                "--llm", "GOOGLE",
+                "--students", "2",
+                "--file", "data/question_content_math_7.csv"
+            ]
+        },
+        {
+            "name": "Debug main.py (LOCAL)",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/main.py",
+            "console": "integratedTerminal",
+            "args": [
+                "--llm", "LOCAL",
+                "--students", "2",
+                "--file", "data/question_content_math_7.csv"
+            ]
+        },
+        {
+            "name": "Debug main.py (OPENAI)",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/main.py",
+            "console": "integratedTerminal",
+            "args": [
+                "--llm", "OPENAI",
+                "--students", "2",
+                "--file", "data/question_content_math_7.csv"
+            ]
+        },
+        {
+            "name": "Debug main.py (Custom Args)",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/main.py",
+            "console": "integratedTerminal",
+            "args": "${command:pickArgs}"
+        }
+    ]
+}
