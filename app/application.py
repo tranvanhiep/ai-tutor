@@ -24,178 +24,106 @@ class Application:
             case LLMType.LOCAL | _:  # Default to LOCAL for any unmatched case
                 return self.config.get_local_llm()
 
-    def setup(self, total_students: int = 100):
-        """Setup the agents and tasks.
-
-        This method initializes the AI tutor system by creating student agents and a teacher agent,
-        along with their associated tasks for problem solving and homework reviewing.
-
-        Args:
-            total_students (int, optional): The number of student agents to create. Defaults to 100.
-                Each student agent will be assigned a problem solving task.
-        """
+    def setup(self, total_students: int = 10):  # Reduced number of students for clarity
+        """Setup the agents and tasks."""
         problem_solving_tasks: list[Task] = []
         students: list[Agent] = []
-        for _ in range(total_students):
+
+        # Create student problem solvers
+        for i in range(total_students):
             student = AgentFactory.create_agent(
-                role="Grade {grade} student",
-                goal="Be a grade {grade} student who are doing homework",
+                role=f"Mathematics Student {i+1}",
+                goal="Solve the mathematics problem and explain your solution clearly",
                 backstory=(
-                    "You are a grade {grade} student who is always one of the most genius in the class."
-                    "You are able to analyze the problem {question} and solve it step-by-step."
-                    "Your resolution are always neat and clean."
-                    "Your resolution are comprehensive and easy to understand to other grade {grade} students."
+                    "You are a grade {grade} student who approaches problems methodically.\n"
+                    "You will:\n"
+                    "1. Read and understand the problem carefully\n"
+                    "2. Show your complete solution step by step\n"
+                    "3. Verify your answer makes sense\n"
+                    "4. Present your solution clearly"
                 ),
-                allow_delegation=False,
                 llm=self.llm,
             )
 
-            problem_solving_task = TaskBuilder.create_task(
+            # Create problem-solving task for each student
+            solve_task = TaskBuilder.create_task(
                 description=(
-                    "You are a grade {grade} student. Here is your homework:\n"
-                    "PROBLEM:\n{question}\n"
-                    "INSTRUCTIONS:\n"
-                    "1. Read and understand the problem carefully\n"
-                    "2. Write down what you know from the problem\n"
-                    "3. Show your solution step-by-step\n"
-                    "4. Explain your thinking at each step\n"
-                    "5. Check your work and verify the answer\n"
-                    "6. Write your final answer clearly"
+                    "Solve this mathematics problem:\n\n"
+                    "{question}\n\n"
+                    "Show your complete solution following this format:\n"
+                    "1. First explain what you understand from the problem\n"
+                    "2. Show your step-by-step solution with explanations\n"
+                    "3. State your final answer clearly\n"
+                    "4. Verify your answer makes sense"
                 ),
                 expected_output=(
-                    "Please provide your submission in this format:\n"
-                    "# Understanding the Problem\n"
-                    "- What we know\n"
-                    "- What we need to find\n"
-                    "# Step-by-Step Solution\n"
-                    "1. First step with explanation\n"
-                    "2. Second step with explanation\n"
-                    "(continue with all steps)\n"
+                    "# Understanding\n"
+                    "* What I know:\n"
+                    "* What I need to find:\n\n"
+                    "# Solution Steps\n"
+                    "1. Step 1\n"
+                    "   * Work: [show calculation]\n"
+                    "   * Because: [explain why]\n"
+                    "[continue steps...]\n\n"
                     "# Final Answer\n"
-                    "- Clear statement of the answer\n"
-                    "- Verification that it makes sense"
+                    "* The answer is: [state clearly]\n"
+                    "* This makes sense because: [verify]\n"
                 ),
                 agent=student,
                 async_execution=True,
             )
 
             students.append(student)
-            problem_solving_tasks.append(problem_solving_task)
+            problem_solving_tasks.append(solve_task)
 
-        teacher = AgentFactory.create_agent(
-            role="Grade {grade} teacher",
-            goal="Review the student's submissions and provide feedback",
+        # Create solution verifier
+        verifier = AgentFactory.create_agent(
+            role="Solution Verifier",
+            goal="Check student solutions and identify the correct one",
             backstory=(
-                "You are a grade {grade} teacher who are responsible to review the student's submissions."
-                "Analyze the student's solutions and verify the correctness of each step."
-                "Make sure the final answer is correct and the reasoning is grade-appropriate."
-                "Provide feedback to the grade {grade} student to help them understand their mistakes."
-                "Provide guidance to the grade {grade} student to help them improve their resolution."
+                "You are a mathematics expert who verifies student solutions.\n"
+                "Your job is to:\n"
+                "1. Review each student's solution\n"
+                "2. Compare their answers with the correct answer\n"
+                "3. Identify which solution (if any) is correct"
             ),
-            allow_delegation=False,
             llm=self.llm,
         )
 
-        homework_reviewing_task = TaskBuilder.create_task(
+        # Create verification task
+        verify_task = TaskBuilder.create_task(
             description=(
-                "You are reviewing all of the grade {grade} student's submissions.\n"
-                "ORIGINAL PROBLEM:\n{question}\n"
-                "REVIEW INSTRUCTIONS:\n"
-                "1. Check each step of the student's work\n"
-                "2. Verify all calculations are correct\n"
-                "3. Ensure the reasoning is grade-appropriate\n"
-                "4. Make sure their final answer is correct\n"
-                "5. Prepare constructive feedback\n"
-                "6. Note any creative approaches they used\n"
+                "TASK: Check student solutions against the correct answer\n\n"
+                "Original Problem: {question}\n"
+                "Correct Answer: {answer}\n\n"
+                "Check if any student found the correct answer by:\n"
+                "1. Looking at their final answers\n"
+                "2. Comparing with the correct answer\n"
+                "3. Stating if anyone got it right"
             ),
             expected_output=(
-                "Please provide your review of submission in this format:\n\n"
-                "# Student submission\n"
-                "- Display student submission here for reference\n"
-                "# Step-by-Step Review\n"
-                "1. Analysis of each step\n"
-                "2. Clarity of explanations\n\n"
-                "# Feedback\n"
-                "- What was done well\n"
-                "- Areas for improvement\n"
-                "- Specific suggestions\n\n"
-                "# Overall Assessment\n"
-                "- Final answer correctness\n"
-                "- Understanding demonstrated"
+                "# Verification Results\n"
+                "* Number of solutions checked: [number]\n"
+                "* Correct solutions found: [yes/no]\n\n"
+                "# Analysis\n"
+                "* Student answers reviewed:\n"
+                "  - Student 1: [their answer]\n"
+                "  - Student 2: [their answer]\n"
+                "  [continue for all students]\n\n"
+                "# Conclusion\n"
+                "* Correct solution found: [yes/no]\n"
+                "* If yes, which student(s): [list them]\n"
+                "* If no, explain why no one got it right\n"
             ),
-            agent=teacher,
+            agent=verifier,
             context=problem_solving_tasks,
         )
 
-        pick_solution_task = TaskBuilder.create_task(
-            description=(
-                "You are the grade {grade} teacher.\n"
-                "Based on your review, you need to choose the most accurate "
-                "and grade-appropriate submission among submissions.\n"
-            ),
-            expected_output=(
-                "Please provide the most accurate and grade-appropriate submission in this format:\n\n"
-                "# Most Accurate And Grade-appropriate Solution\n"
-                "- Display the student step-by-step solution with explanation here\n"
-                "# Justification\n"
-                "- Explain why you choose this solution\n"
-            ),
-            agent=teacher,
-            context=[homework_reviewing_task],
-        )
-
-        # Add Marker agent
-        marker = AgentFactory.create_agent(
-            role="Grade {grade} marker",
-            goal="Verify student solutions against the correct answer",
-            backstory=(
-                "You are an expert marker for grade {grade}.\n"
-                "Your role is to verify if student solutions match the expected answer {answer}.\n"
-                "You have deep understanding of multiple solution approaches.\n"
-                "You can determine if different solution methods arrive at equivalent results.\n"
-                "You are extremely detail-oriented and catch even minor calculation errors."
-            ),
-            allow_delegation=False,
-            llm=self.llm,
-        )
-
-        verify_solution_task = TaskBuilder.create_task(
-            description=(
-                "As a grade {grade} marker, verify the chosen solution against the correct answer.\n"
-                "CORRECT ANSWER: {answer}\n"
-                "VERIFICATION INSTRUCTIONS:\n"
-                "1. Check if the final answer matches exactly\n"
-                "2. If different, determine if it's equivalent\n"
-                "3. Verify all calculations in the solution\n"
-                "4. Check if the solution method is valid\n"
-                "5. Note any discrepancies found"
-            ),
-            expected_output=(
-                "Please provide your verification in this format:\n\n"
-                "# Answer Verification\n"
-                "- Expected Answer: {answer}\n"
-                "- Student's Answer: [extract from solution]\n"
-                "- Equivalence Status: [Exact Match/Equivalent/Incorrect]\n\n"
-                "# Calculation Check\n"
-                "- All calculations verified: [Yes/No]\n"
-                "- Errors found: [List any errors]\n\n"
-                "# Method Validation\n"
-                "- Solution method: [Valid/Invalid]\n"
-                "- Mathematical rigor: [Assessment]\n\n"
-                "# Final Verdict\n"
-                "- [CORRECT/INCORRECT]\n"
-                "- Detailed justification"
-            ),
-            agent=marker,
-            context=[pick_solution_task],
-        )
-
-        self.crew_manager.add_agents(*students, teacher, marker)
+        # Add agents and tasks to crew manager
+        self.crew_manager.add_agents(*students, verifier)
         self.crew_manager.add_tasks(
             *problem_solving_tasks,
-            homework_reviewing_task,
-            pick_solution_task,
-            verify_solution_task
+            verify_task
         )
 
     def run(self, inputs: dict):
