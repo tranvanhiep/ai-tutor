@@ -10,13 +10,13 @@ class TaskBuilder():
             description: str,
             expected_output: str,
             agent: Agent,
-            context: List[Task] = None,
             async_execution: bool = False,
+            context: List[Task] = None,
     ):
         return Task(
             description=description,
             expected_output=expected_output,
             agent=agent,
             async_execution=async_execution,
-            context=context
+            context=context,
         )

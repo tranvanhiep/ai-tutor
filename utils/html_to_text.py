@@ -93,7 +93,7 @@ class HTMLToText:
             """ if has_html else None
             text_content = f"{content['item_description']}\n{content['question']}"
         else:  # answer
-            has_html = '<' in content
+            has_html = '<' in content['answer']
             html_content = f"""
             <div style="font-family: 'Noto Sans JP', Arial, sans-serif; padding: 20px;">
                 <div>{content['answer']}</div>

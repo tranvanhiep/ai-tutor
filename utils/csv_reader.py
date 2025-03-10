@@ -11,25 +11,38 @@ class CSVReader:
     def read_to_dict(self) -> List[Dict]:
         """
         Reads a CSV file and returns a list of dictionaries.
-        If item_id is unique among rows, question will be empty.
-        If item_id appears multiple times, question will be question_content.
+        Empty item_ids are filled with the previous valid item_id.
         """
         try:
             with open(self.filepath, mode='r', encoding='utf-8') as file:
                 csv_reader = csv.DictReader(file)
-                rows = list(csv_reader)
+                original_rows = list(csv_reader)
+
+                # Fill empty item_ids into temp_rows
+                temp_rows = []
+                previous_id = None
+                for row in original_rows:
+                    # Create a new dict to avoid modifying original row
+                    new_row = row.copy()
+                    if not new_row['item_id'].strip():
+                        if previous_id is None:
+                            raise ValueError("First row cannot have empty item_id")
+                        new_row['item_id'] = previous_id
+                    else:
+                        previous_id = new_row['item_id']
+                    temp_rows.append(new_row)
 
                 # Count occurrences of each item_id
                 item_id_counts = {}
-                for row in rows:
+                for row in original_rows:
                     item_id = row['item_id']
                     item_id_counts[item_id] = item_id_counts.get(item_id, 0) + 1
 
                 # Group by item_id and fill data
                 item_descriptions = {}
                 correct_options = {}
-                for row in rows:
-                    item_id = row['item_id']
+                for row in temp_rows:
+                    item_id = row['item_id'].strip()
                     if row['item_description'] and item_id not in item_descriptions:
                         item_descriptions[item_id] = row['item_description']
                     if row['correct_option'].upper() == 'TRUE':
@@ -37,11 +50,14 @@ class CSVReader:
 
                 # Create final list with processed data
                 processed_rows = []
-                for row in rows:
-                    item_id = row['item_id']
-                    if bool(item_id.strip()):
+                for row in original_rows:
+                    item_id = row['item_id'].strip()
+                    if bool(item_id):
                         processed_rows.append({
-                            'question': row['question_content'] if item_id_counts[item_id] > 1 else '',
+                            'question': row['question_content'] if (
+                                item_id_counts[item_id] > 1 or
+                                not row['item_description'].strip()
+                            ) else '',
                             'answer': correct_options.get(item_id),
                             'item_id': item_id,
                             'item_description': (
@@ -55,6 +71,8 @@ class CSVReader:
 
         except FileNotFoundError:
             raise FileNotFoundError(f"CSV file not found at: {self.filepath}")
+        except ValueError as e:
+            raise ValueError(f"Error processing CSV data: {str(e)}")
         except IOError as e:
             raise IOError(f"Error reading CSV file: {str(e)}")
 

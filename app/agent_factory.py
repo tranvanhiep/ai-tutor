@@ -9,8 +9,8 @@ class AgentFactory:
         role: str,
         goal: str,
         backstory: str,
-        allow_delegation: bool,
         llm: LLM,
+        allow_delegation: bool = False,
     ):
         return Agent(
             role=role,

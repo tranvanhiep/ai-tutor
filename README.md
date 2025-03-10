@@ -54,14 +54,35 @@ Edit `.env` file with your API keys and configuration.
 Run the application using main.py:
 
 ```bash
-python main.py --llm GOOGLE --students 10 --file data/question_content_math_7.csv
+python main.py --llm GOOGLE --students 10 --file data/question_content_math_7.csv --enable-converter
 ```
 
 ### Command Line Arguments
 
-- `--llm`: Choose LLM backend (GOOGLE, OPENAI, or LOCAL)
-- `--students`: Number of student agents to simulate (default: 10)
-- `--file`: Path to CSV file containing math problems
+The application accepts the following command line arguments:
+
+| Argument | Description | Type | Default | Values |
+|----------|-------------|------|---------|---------|
+| `--llm` | LLM type to use | string | `GOOGLE` | `GOOGLE`, `OPENAI`, `LOCAL` |
+| `--students` | Number of students to simulate | integer | `10` | Any positive integer |
+| `--file` | Path to CSV file containing problems | string | `data/question_content_math_7.csv` | Valid file path |
+| `--enable-converter` | Enable HTML to text conversion for math content | boolean | `False` | `True` when flag present |
+
+### Example Usage
+
+```bash
+# Run with default settings
+python main.py
+
+# Run with OpenAI and 5 students
+python main.py --llm OPENAI --students 5
+
+# Run with HTML conversion enabled
+python main.py --enable-converter
+
+# Run with custom problem set and HTML conversion
+python main.py --file custom_problems.csv --enable-converter
+```
 
 ## Project Structure
 
