@@ -104,6 +104,5 @@ python main.py --file custom_problems.csv --enable-converter
 The system will:
 1. Load a random math problem
 2. Generate student solutions
-3. Have the teacher review solutions
-4. Verify answer correctness
-5. Provide detailed feedback
+3. Verify answer correctness
+4. Provide detailed feedback
