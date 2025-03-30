@@ -43,6 +43,7 @@ class Application:
                     "4. Present your solution clearly"
                 ),
                 llm=self.llm,
+                max_rpm=self.config.get_max_rpm(),
             )
 
             # Create problem-solving task for each student
@@ -88,6 +89,7 @@ class Application:
                 "3. Identify which solution (if any) is correct"
             ),
             llm=self.llm,
+            max_rpm=self.config.get_max_rpm(),
         )
 
         # Create verification task
@@ -107,8 +109,8 @@ class Application:
                 "* Correct solutions found: [yes/no]\n\n"
                 "# Analysis\n"
                 "* Student answers reviewed:\n"
-                "  - Student 1: [their answer]\n"
-                "  - Student 2: [their answer]\n"
+                "  - Student 1: [their answer and step-by-step solution]\n"
+                "  - Student 2: [their answer and step-by-step solution]\n"
                 "  [continue for all students]\n\n"
                 "# Conclusion\n"
                 "* Correct solution found: [yes/no]\n"

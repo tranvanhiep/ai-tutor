@@ -15,6 +15,8 @@ class Config:
         self.google_model = os.getenv("GOOGLE_MODEL")
         self.google_embedder_model = os.getenv("GOOGLE_EMBEDDER_MODEL")
         self.local_model = os.getenv("LOCAL_MODEL")
+        max_rpm = os.getenv("MAX_RPM")
+        self.max_rpm = int(max_rpm) if max_rpm is not None else None
 
     def get_google_llm(self):
         if self.google_api_key is None:
@@ -66,3 +68,7 @@ class Config:
             base_url="http://localhost:11434",
             temperature=1.0,
         )
+
+    def get_max_rpm(self) -> int | None:
+        """Get the configured max RPM value or None if not set."""
+        return self.max_rpm
