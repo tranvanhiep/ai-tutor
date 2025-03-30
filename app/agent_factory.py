@@ -10,6 +10,7 @@ class AgentFactory:
         goal: str,
         backstory: str,
         llm: LLM,
+        max_rpm: int = None,
         allow_delegation: bool = False,
     ):
         return Agent(
@@ -19,4 +20,5 @@ class AgentFactory:
             allow_delegation=allow_delegation,
             verbose=True,
             llm=llm,
+            max_rpm=max_rpm,
         )

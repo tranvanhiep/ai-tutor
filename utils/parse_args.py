@@ -30,7 +30,6 @@ def parse_args():
     parser.add_argument(
         '--enable-converter',
         action='store_true',
-        type=bool,
         default=False,
         help='Enable HTML to text conversion (default: False)'
     )
